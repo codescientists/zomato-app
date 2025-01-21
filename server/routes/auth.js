@@ -26,7 +26,7 @@ router.post("/forgot-password", forgotPassword);
 router.post("/reset-password", resetPassword);
 
 // Route to get the logged-in user's details
-router.get("/me", authMiddleware, isAdmin, getUser);
+router.get("/me", getUser);
 
 
 module.exports = router;
