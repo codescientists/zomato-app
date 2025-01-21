@@ -6,11 +6,12 @@ const {
   updateRestaurant,
   deleteRestaurant,
 } = require("../controllers/restaurantsController");
+const {authMiddleware, isAdmin} = require("../middlewares/authMiddleware");
 
 const router = express.Router();
 
 // Create a new restaurant
-router.post("/", createRestaurant);
+router.post("/", authMiddleware, isAdmin, createRestaurant);
 
 // Get all restaurants with filtering, sorting, and pagination
 router.get("/", getRestaurants);
@@ -19,9 +20,9 @@ router.get("/", getRestaurants);
 router.get("/:id", getRestaurantById);
 
 // Update a specific restaurant
-router.put("/:id", updateRestaurant);
+router.put("/:id", authMiddleware, isAdmin, updateRestaurant);
 
 // Delete a specific restaurant
-router.delete("/:id", deleteRestaurant);
+router.delete("/:id", authMiddleware, isAdmin, deleteRestaurant);
 
 module.exports = router;

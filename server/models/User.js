@@ -4,7 +4,6 @@ const UserSchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      required: true,
       trim: true,
     },
     email: {
@@ -16,11 +15,9 @@ const UserSchema = new mongoose.Schema(
     },
     password: {
       type: String,
-      required: true,
     },
     phoneNumber: {
       type: String,
-      required: true,
       unique: true,
     },
     role: {
@@ -45,6 +42,7 @@ const UserSchema = new mongoose.Schema(
       },
       coordinates: {
         type: [Number], // [longitude, latitude]
+        default: [0, 0],
       },
     },
     favorites: [

@@ -22,7 +22,7 @@ const RestaurantSchema = new mongoose.Schema(
       },
     ],
     category: {
-      type: [String],
+      type: String,
       enum: [
         "Fast Food",
         "Casual Dining",
@@ -52,7 +52,7 @@ const RestaurantSchema = new mongoose.Schema(
       },
       coordinates: {
         type: [Number], // [longitude, latitude]
-        required: true,
+        default: [0, 0],
       },
     },
 
@@ -78,12 +78,9 @@ const RestaurantSchema = new mongoose.Schema(
     // Menu and Offerings
     menu: [
       {
-        name: { type: String, required: true },
-        description: { type: String },
-        price: { type: Number, required: true },
-        category: { type: String }, // e.g., Appetizers, Desserts
-        isAvailable: { type: Boolean, default: true },
-        imageUrl: { type: String },
+        type: mongoose.Schema.Types.ObjectId,
+          ref: "Dish",
+          required: true,
       },
     ],
     averageCostForTwo: {
