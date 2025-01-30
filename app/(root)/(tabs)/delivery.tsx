@@ -4,42 +4,77 @@ import { Link } from 'expo-router';
 import { ActivityIndicator, FlatList, Image, Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFetch } from '@/lib/fetch';
+import { Fragment } from 'react';
+import { useAuth } from '@/context/authContext';
+import { AntDesign } from '@expo/vector-icons';
+import SearchTextInput from '@/components/SearchTextInput';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+} from "react-native-reanimated";
+
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+
+type ItemProps = { item: { _id: string, name: string, bannerImages: string[], cuisines: string[], averageRating: number, averageCostForTwo: number } };
+
+const Item = ({ item }: ItemProps) => {
+
+  const scale = useSharedValue(1);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
 
 
-type ItemProps = { item: { id: string, name: string, image: string, cuisine: [], rating: number, averageCost: number } };
-
-const Item = ({ item }: ItemProps) => (
-  <Link href={`/(root)/restaurants/${item.id}`} asChild>
-    <Pressable>
-      <View className="border border-gray-300 my-2 rounded-3xl overflow-hidden">
-        <Image src={item.image} className="w-full h-56" />
-        <View className="px-4 py-4">
-          <Text className="font-bold text-lg">{item.name}</Text>
-          <Text className="font-medium text-gray-500">{item.cuisine[0]} • ₹{item.averageCost} for one </Text>
-          <View className="h-[1px] w-full my-2 bg-gray-300" />
-          <View className="flex flex-row items-center space-x-2">
-            <Image source={icons.discountBadge} className="w-5 h-5" />
-            <Text className="font-semibold text-gray-500">Flat ₹125 OFF + ₹25 cashback</Text>
+  return (
+    <Link href={`/(root)/restaurants/${item._id}`} key={item._id} asChild>
+      <AnimatedPressable
+        onPressIn={() => (scale.value = withSpring(0.96))} // Shrink effect
+        onPressOut={() => (scale.value = withSpring(1))} // Back to normal
+        style={animatedStyle}
+      >
+        <View className="border border-gray-300 my-4 rounded-3xl overflow-hidden"
+          style={{
+            borderRadius: 24, // Ensure it matches your border radius
+            backgroundColor: "white",
+            marginVertical: 8,
+            shadowColor: "#000",
+            shadowOffset: { width: 0, height: 8 },
+            shadowOpacity: 0.15,
+            shadowRadius: 12,
+            elevation: 8, // For Android shadow
+          }}>
+          <Image src={item.bannerImages[0]} className="w-full h-56" />
+          <View className="px-4 py-4">
+            <Text className="font-bold text-lg">{item.name}</Text>
+            <Text className="font-medium text-gray-500">{item.cuisines[0]} • ₹{item.averageCostForTwo} for one </Text>
+            <View className="h-[1px] w-full my-2 bg-gray-300" />
+            <View className="flex flex-row items-center gap-2">
+              <Image source={icons.discountBadge} className="w-5 h-5" />
+              <Text className="font-semibold text-gray-500">Flat ₹125 OFF + ₹25 cashback</Text>
+            </View>
           </View>
         </View>
-      </View>
-    </Pressable>
-  </Link>
-);
+      </AnimatedPressable>
+    </Link>
+  );
+}
 
 export default function DeliveryScreen() {
   const {
     data: restaurants,
     loading,
     error,
-  } = useFetch<any>(`${process.env.EXPO_PUBLIC_API_BASE_URL}/api/restaurants`);
+  } = useFetch<any>(`${process.env.EXPO_PUBLIC_API_BASE_URL}/api/v1/restaurants`);
+  const { isAuthenticated } = useAuth();
 
   return (
     <SafeAreaView className="h-full flex items-center justify-center bg-white px-2">
       <FlatList
         data={restaurants}
-        renderItem={({ item }) => <Item item={item} />}
-        keyExtractor={(item, index) => item.id}
+        renderItem={({ item }) => <Item item={item} key={item._id} />}
+        keyExtractor={(item, index) => item._id}
         className="px-3"
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={{
@@ -48,7 +83,7 @@ export default function DeliveryScreen() {
         ListEmptyComponent={() => (
           <View className="flex flex-col items-center justify-center">
             {!loading ? (
-              <>
+              <Fragment>
                 <Image
                   source={icons.dineIn}
                   className="w-40 h-40"
@@ -56,52 +91,48 @@ export default function DeliveryScreen() {
                   resizeMode="contain"
                 />
                 <Text className="text-[8px]">No restaurants found</Text>
-              </>
+              </Fragment>
             ) : (
               <ActivityIndicator size="small" color="#e23744" />
             )}
           </View>
         )}
         ListHeaderComponent={
-          <>
+          <Fragment>
             <View className="flex flex-row items-center justify-between my-2 w-full">
-              <View className="flex flex-row items-center space-x-2">
+              <View className="flex flex-row items-center gap-2">
                 <Image source={icons.locationPin} className="w-6 h-6" tintColor="#e23744" />
                 <View>
-                  <Text className="text-l8font-bold  ">
+                  <Text className="text-lg font-bold">
                     Home
                   </Text>
-                  <Text className="text-m8font-medium text-gray-500">
+                  <Text className="text-md font-medium text-gray-500">
                     Chirle, Belondkhar, India
                   </Text>
-                  {/* <SignedIn>
-                    <Text>Hello {user?.emailAddresses[0].emailAddress}</Text>
-                  </SignedIn>
-                  <SignedOut>
-                    <Link href="/sign-in">
-                      <Text>Sign In</Text>
-                    </Link>
-                    <Link href="/sign-up">
-                      <Text>Sign Up</Text>
-                    </Link>
-                  </SignedOut> */}
                 </View>
               </View>
               <View
-                className="flex justify-center items-center w-10 h-10 rounded-full bg-blue-100"
+                className="flex justify-center items-center w-12 h-12 rounded-full bg-blue-100"
               >
-                <Link href={`/(root)/profile`} className="text-b8e-600 text-lg font-semibold leading-none w-fit h-fit">
-                  P
-                </Link>
+                {
+                  isAuthenticated ?
+                    <Link href={`/(root)/profile`} className="text-b8e-600 text-lg font-semibold leading-none w-fit h-fit">
+                      P
+                    </Link>
+                    :
+                    <Link href={`/(auth)/login`}>
+                      <AntDesign name="login" size={20} color="black" />
+                    </Link>
+                }
               </View>
             </View>
 
-            {/* <SearchTextInput
-              containerStyle="bg-white"
-              // handlePress={handleDestinationPress}
-            /> */}
+            <SearchTextInput
+              containerStyle="bg-white my-2"
+            // handlePress={handleDestinationPress}
+            />
 
-            <>
+            <Fragment>
               <View className="flex flex-row items-center justify-center mt-5 mb-2">
                 <View className="h-[1px] flex-1 bg-gray-300" />
                 <Text className="mx-4 text-gray-500 text-md tracking-widest">EXPLORE</Text>
@@ -136,9 +167,9 @@ export default function DeliveryScreen() {
                   <Text className="text-[9px] font-semibold text-gray-500">Delivery at seat</Text>
                 </View>
               </ScrollView>
-            </>
+            </Fragment>
 
-            <>
+            <Fragment>
               <View className="flex flex-row items-center justify-center mt-5 mb-2">
                 <View className="h-[1px] flex-1 bg-gray-300" />
                 <Text className="mx-4 text-gray-500 text-md tracking-widest uppercase">What's on your mind?</Text>
@@ -212,14 +243,14 @@ export default function DeliveryScreen() {
                   </View>
                 </View>
               </ScrollView>
-            </>
+            </Fragment>
 
             <View className="flex flex-row items-center justify-center mt-5 mb-2">
               <View className="h-[1px] flex-1 bg-gray-300" />
               <Text className="mx-4 text-gray-500 text-md tracking-widest uppercase">All Restaurants</Text>
               <View className="h-[1px] flex-1 bg-gray-300" />
             </View>
-          </>
+          </Fragment>
         }
       />
     </SafeAreaView>

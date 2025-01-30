@@ -33,6 +33,7 @@ import noodles from "@/assets/images/noodles.png";
 
 import bigBowl from "@/assets/images/big-bowl.png";
 
+import loginImage from "@/assets/images/onboarding.webp";
 import onboarding1 from "@/assets/images/onboarding1.jpg";
 import onboarding2 from "@/assets/images/onboarding2.jpg";
 import onboarding3 from "@/assets/images/onboarding3.jpg";
@@ -42,6 +43,7 @@ import check from "@/assets/images/check.png";
 
 
 export const images = {
+  loginImage,
   discount,
   party,
   brand,
